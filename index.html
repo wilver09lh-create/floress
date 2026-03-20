@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ramo de Girasoles</title>
+    <title>Girasoles</title>
     <style>
         /* Estilos generales y fondo nocturno */
         body {
@@ -16,7 +16,7 @@
             justify-content: center;
         }
 
-        /* El lienzo donde se dibujará la flor */
+        /* El lienzo donde se dibujará el ramo */
         canvas {
             position: absolute;
             top: 0;
@@ -24,24 +24,43 @@
             z-index: 1;
         }
 
-        /* Contenedor del mensaje */
+        /* 2. Contenedor del mensaje AJUSTADO PARA MÓVILES */
         .mensaje {
             position: absolute;
-            top: 8%;
+            top: 8%; /* Espacio desde arriba */
             z-index: 2;
             text-align: center;
-            width: 100%;
+            width: 90%; /* Ancho del 90% para dejar márgenes */
+            max-width: 600px; /* Ancho máximo para no verse tan ancho en PC */
             pointer-events: none;
+            left: 50%;
+            transform: translateX(-50%); /* Centrado perfecto horizontal */
         }
 
-        /* Letra en amarillo brillante con resplandor */
+        /* Estilo base de la letra (PC y tablets grandes) */
         h1 {
             font-style: italic;
-            font-size: 2.5rem;
             color: #FFD700; /* Amarillo Oro */
-          
+            text-shadow: 0 0 15px #FFFF00, 0 0 5px #DAA520; /* Resplandor amarillo/oro */
             margin: 0;
-            padding: 0 20px;
+            padding: 0;
+            
+            /* Tamaño predeterminado para PC */
+            font-size: 2.5rem; 
+            line-height: 1.2; /* Interlineado cómodo */
+        }
+
+        /* --- 3. NUEVA SECCIÓN: MEDIA QUERY PARA AJUSTAR EN CELULARES --- */
+        /* Si la pantalla es menor a 600px de ancho... */
+        @media (max-width: 600px) {
+            h1 {
+                /* Reducimos el tamaño del texto para que quepa bien en el celular */
+                font-size: 1.6rem; 
+                line-height: 1.3; /* Un poco más de espacio entre líneas si el texto se corta */
+            }
+            .mensaje {
+                top: 10%; /* Bajamos un poquito más el mensaje en móviles */
+            }
         }
     </style>
 </head>
@@ -54,6 +73,11 @@
     <canvas id="lienzoRamo"></canvas>
 
     <script>
+        // --- AQUÍ VA EL MISMO CÓDIGO JAVASCRIPT DE LOS GIRASOLES ---
+        // (No lo pego completo aquí para no hacer este mensaje eterno,
+        // pero asegúrate de usar todo el script que dibuja el ramo de girasoles
+        // que te envié en el mensaje anterior dentro de esta etiqueta <script>)
+
         const canvas = document.getElementById('lienzoRamo');
         const ctx = canvas.getContext('2d');
 
@@ -62,86 +86,64 @@
         canvas.height = window.innerHeight;
 
         const centroX = canvas.width / 2;
-        // Posición base para el ramo
         const baseRamoY = canvas.height * 0.8;
 
-        // 1. Dibujar el fondo estático (Estrellas, Luna y Flores pequeñas)
         function dibujarEscenario() {
-            // Cielo estrellado
             ctx.fillStyle = "white";
             for(let i = 0; i < 150; i++) {
                 ctx.beginPath();
                 ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.5, 0, Math.PI * 2);
                 ctx.fill();
             }
-
-            // Luna
-            ctx.fillStyle = "#FFFACD"; // Amarillo pastel
+            ctx.fillStyle = "#FFFACD";
             ctx.beginPath();
             ctx.arc(canvas.width * 0.8, canvas.height * 0.2, 50, 0, Math.PI * 2);
             ctx.fill();
-            // Resplandor de la luna
             ctx.shadowBlur = 20;
             ctx.shadowColor = "#FFFACD";
             ctx.fill();
-            ctx.shadowBlur = 0; // Resetear sombra
+            ctx.shadowBlur = 0;
         }
 
         function dibujarFlorPequena(x, y, tamano) {
-            // Pétalos blancos
             ctx.fillStyle = "white";
             for(let i = 0; i < 5; i++) {
                 ctx.beginPath();
                 ctx.ellipse(x, y - tamano, tamano/2, tamano, 0, 0, Math.PI*2);
                 ctx.fill();
-                // Rotar para el siguiente pétalo
                 ctx.translate(x, y);
                 ctx.rotate((Math.PI * 2) / 5);
                 ctx.translate(-x, -y);
             }
-            // Centro amarillo
             ctx.fillStyle = "#FFD700";
             ctx.beginPath();
             ctx.arc(x, y, tamano/1.5, 0, Math.PI*2);
             ctx.fill();
         }
 
-        // 2. Funciones para dibujar los girasoles
-
-        // Función para dibujar un girasol individual
         function dibujarGirasol(x, y, rotacion, escala) {
             ctx.save();
             ctx.translate(x, y);
             ctx.rotate(rotacion);
             ctx.scale(escala, escala);
-
-            // Tallo (más grueso para girasol)
-            ctx.strokeStyle = "#1E5F33"; // Verde oscuro
+            ctx.strokeStyle = "#1E5F33";
             ctx.lineWidth = 10;
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.quadraticCurveTo(20, 100, 0, 300); // Curva del tallo
+            ctx.quadraticCurveTo(20, 100, 0, 300);
             ctx.stroke();
-
-            // Hojas grandes de girasol
             ctx.fillStyle = "#2E8B57";
-            // Hoja izquierda
             ctx.beginPath();
             ctx.ellipse(-30, 150, 15, 60, Math.PI / 4, 0, Math.PI * 2);
             ctx.fill();
-            // Hoja derecha
             ctx.beginPath();
             ctx.ellipse(30, 200, 15, 60, -Math.PI / 4, 0, Math.PI * 2);
             ctx.fill();
-
-            // Flor (Cabeza del Girasol)
             const numPetalos = 24;
             const radioCentro = 40;
             const largoPetalo = 90;
             const anchoPetalo = 20;
-
-            // Pétalos - Capa Trasera (más oscuros)
-            ctx.fillStyle = "#FFA500"; // Naranja para profundidad
+            ctx.fillStyle = "#FFA500";
             ctx.strokeStyle = "#DAA520";
             ctx.lineWidth = 1;
             for (let i = 0; i < numPetalos; i++) {
@@ -153,9 +155,7 @@
                 ctx.stroke();
                 ctx.restore();
             }
-
-            // Pétalos - Capa Delantera (más brillantes e intercalados)
-            ctx.fillStyle = "#FFD700"; // Amarillo brillante
+            ctx.fillStyle = "#FFD700";
             ctx.strokeStyle = "#FFFF00";
             for (let i = 0; i < numPetalos; i++) {
                 ctx.save();
@@ -166,13 +166,10 @@
                 ctx.stroke();
                 ctx.restore();
             }
-
-            // Centro oscuro del girasol (semillas)
-            ctx.fillStyle = "#4B3621"; // Marrón muy oscuro
+            ctx.fillStyle = "#4B3621";
             ctx.beginPath();
             ctx.arc(0, 0, radioCentro, 0, Math.PI * 2);
             ctx.fill();
-            // Textura del centro (puntos más oscuros)
             ctx.fillStyle = "#2F1B0A";
             for (let i = 0; i < 50; i++) {
                 const r = Math.random() * (radioCentro - 5);
@@ -181,22 +178,16 @@
                 ctx.arc(Math.cos(a) * r, Math.sin(a) * r, 1.5, 0, Math.PI * 2);
                 ctx.fill();
             }
-
             ctx.restore();
         }
 
-        // --- Secuencia de Animación ---
         dibujarEscenario();
-        
-        // Esparcir flores pequeñas por abajo
         dibujarFlorPequena(canvas.width * 0.15, canvas.height * 0.85, 12);
         dibujarFlorPequena(canvas.width * 0.85, canvas.height * 0.9, 15);
         dibujarFlorPequena(canvas.width * 0.3, canvas.height * 0.95, 10);
         dibujarFlorPequena(canvas.width * 0.75, canvas.height * 0.8, 18);
         dibujarFlorPequena(canvas.width * 0.5, canvas.height * 0.98, 14);
 
-        // Definir la posición, rotación y escala de cada girasol en el ramo
-        // Dado que los girasoles son más grandes, ajustamos las posiciones
         const girasolesInfo = [
             { x: centroX - 120, y: baseRamoY - 120, rot: -0.2, esc: 0.7 },
             { x: centroX - 50, y: baseRamoY - 180, rot: -0.1, esc: 0.8 },
@@ -204,23 +195,20 @@
             { x: centroX + 130, y: baseRamoY - 140, rot: 0.25, esc: 0.75 },
             { x: centroX - 70, y: baseRamoY - 60, rot: -0.15, esc: 0.7 },
             { x: centroX + 70, y: baseRamoY - 70, rot: 0.15, esc: 0.75 },
-            { x: centroX, y: baseRamoY, rot: 0, esc: 0.9 } // Girasol central más grande y abajo
+            { x: centroX, y: baseRamoY, rot: 0, esc: 0.9 }
         ];
 
         let girasolesDibujados = 0;
         const totalGirasoles = girasolesInfo.length;
 
-        // Función que se llama a sí misma para animar girasol por girasol
         function animarRamo() {
             if (girasolesDibujados < totalGirasoles) {
                 const info = girasolesInfo[girasolesDibujados];
                 dibujarGirasol(info.x, info.y, info.rot, info.esc);
                 girasolesDibujados++;
-                // Velocidad de la animación (800 milisegundos entre cada girasol)
                 setTimeout(animarRamo, 800);
             } else {
-                // Dibujar un lazo dorado al final para el ramo
-                ctx.strokeStyle = "#DAA520"; // Oro viejo
+                ctx.strokeStyle = "#DAA520";
                 ctx.lineWidth = 6;
                 ctx.beginPath();
                 ctx.moveTo(centroX - 40, baseRamoY + 120);
@@ -234,15 +222,11 @@
             }
         }
 
-        // Iniciar la animación del ramo después de 1 segundo
         setTimeout(animarRamo, 1000);
 
-        // Ajustar tamaño si cambia la pantalla del dispositivo
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            // Al recargar la pantalla se tendría que redibujar, 
-            // pero para simplificar, se recomienda abrir en pantalla completa.
         });
     </script>
 </body>
