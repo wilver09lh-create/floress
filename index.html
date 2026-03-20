@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flor</title>
+    <style>
+        /* Estilos generales y fondo nocturno */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #907f88; /* Azul noche profundo */
+            overflow: hidden; /* Evita barras de desplazamiento */
+            font-family: 'Georgia', serif;
+            color: rgb(255, 247, 0);
+            display: flex;
+            justify-content: center;
+        }
+
+        /* El lienzo donde se dibujará la flor */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Contenedor del mensaje */
+        .mensaje {
+            position: absolute;
+            top: 8%;
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        h1 {
+            font-style: italic;
+            font-size: 2.5rem;
+            margin: 0;
+            padding: 0 20px;
+        }
+
+       
+        
+
+        @keyframes flotar {
+            0% { transform: translateY(100vh) scale(0.5); opacity: 1; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mensaje">
+        <h1>Feliz dia de las flores amarrillas</h1>
+    </div>
+
+    
+
+    <canvas id="lienzoFlor"></canvas>
+
+    <script>
+        const canvas = document.getElementById('lienzoFlor');
+        const ctx = canvas.getContext('2d');
+
+        // Ajustar el canvas al tamaño de la pantalla
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const centroX = canvas.width / 2;
+        const centroY = canvas.height / 2 + 100;
+
+        // 1. Dibujar el fondo estático (Estrellas, Luna y Flores pequeñas)
+        function dibujarEscenario() {
+            // Cielo estrellado
+            ctx.fillStyle = "white";
+            for(let i = 0; i < 150; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Luna
+            ctx.fillStyle = "#FFFACD"; // Amarillo pastel
+            ctx.beginPath();
+            ctx.arc(canvas.width * 0.8, canvas.height * 0.2, 50, 0, Math.PI * 2);
+            ctx.fill();
+            // Resplandor de la luna
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "#FFFACD";
+            ctx.fill();
+            ctx.shadowBlur = 0; // Resetear sombra
+        }
+
+        function dibujarFlorPequena(x, y, tamano) {
+            // Pétalos blancos
+            ctx.fillStyle = "white";
+            for(let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.ellipse(x, y - tamano, tamano/2, tamano, 0, 0, Math.PI*2);
+                ctx.fill();
+                // Rotar para el siguiente pétalo
+                ctx.translate(x, y);
+                ctx.rotate((Math.PI * 2) / 5);
+                ctx.translate(-x, -y);
+            }
+            // Centro amarillo
+            ctx.fillStyle = "#FFD700";
+            ctx.beginPath();
+            ctx.arc(x, y, tamano/1.5, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // 2. Funciones para dibujar la flor principal
+        function dibujarTallo() {
+            ctx.strokeStyle = "#2E8B57";
+            ctx.lineWidth = 12;
+            ctx.beginPath();
+            ctx.moveTo(centroX, canvas.height);
+            // Curva suave para el tallo
+            ctx.quadraticCurveTo(centroX - 30, centroY + 100, centroX, centroY);
+            ctx.stroke();
+        }
+
+        function dibujarPetalo(angulo, esFrente) {
+            ctx.translate(centroX, centroY);
+            ctx.rotate(angulo);
+            
+            ctx.fillStyle = esFrente ? "#FFD700" : "#FFA500"; // Color de relleno
+            ctx.strokeStyle = esFrente ? "#FFFF00" : "#FF8C00"; // Color de borde
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            // Forma del pétalo
+            ctx.ellipse(0, -80, 25, 80, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.stroke();
+            
+            ctx.rotate(-angulo);
+            ctx.translate(-centroX, -centroY);
+        }
+
+        function dibujarCentro() {
+            // Centro marrón oscuro
+            ctx.fillStyle = "#4E342E";
+            ctx.beginPath();
+            ctx.arc(centroX, centroY, 50, 0, Math.PI*2);
+            ctx.fill();
+            // Textura central más oscura
+            ctx.fillStyle = "#26140F";
+            ctx.beginPath();
+            ctx.arc(centroX, centroY, 35, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // --- Secuencia de Animación ---
+        dibujarEscenario();
+        
+        // Esparcir flores pequeñas por abajo
+        dibujarFlorPequena(canvas.width * 0.15, canvas.height * 0.85, 12);
+        dibujarFlorPequena(canvas.width * 0.85, canvas.height * 0.9, 15);
+        dibujarFlorPequena(canvas.width * 0.3, canvas.height * 0.95, 10);
+        dibujarFlorPequena(canvas.width * 0.75, canvas.height * 0.8, 18);
+        dibujarFlorPequena(canvas.width * 0.5, canvas.height * 0.98, 14);
+
+        dibujarTallo();
+
+        let petalosDibujados = 0;
+        const totalPetalosAtras = 15;
+        const totalPetalosFrente = 15;
+
+        // Función que se llama a sí misma para animar pétalo por pétalo
+        function animarFlor() {
+            if (petalosDibujados < totalPetalosAtras) {
+                // Dibujar capa trasera
+                dibujarPetalo((petalosDibujados * 24) * Math.PI / 180, false);
+            } else if (petalosDibujados < (totalPetalosAtras + totalPetalosFrente)) {
+                // Dibujar capa delantera intercalada
+                let indexFrente = petalosDibujados - totalPetalosAtras;
+                dibujarPetalo((indexFrente * 24 + 12) * Math.PI / 180, true);
+            } else {
+                // Dibujar el centro al final y detener animación
+                dibujarCentro();
+                return; 
+            }
+            
+            petalosDibujados++;
+            // Velocidad de la animación (100 milisegundos entre cada pétalo)
+            setTimeout(animarFlor, 100);
+        }
+
+        // Iniciar la animación de los pétalos después de 1 segundo
+        setTimeout(animarFlor, 1000);
+
+        // Ajustar tamaño si cambia la pantalla del dispositivo
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Al recargar la pantalla se tendría que redibujar, 
+            // pero para simplificar, se recomienda abrir en pantalla completa.
+        });
+    </script>
+</body>
+</html>
